@@ -1,0 +1,23 @@
+# Mengabaikan dependensi besar
+frontend/node_modules/
+backend/vendor/
+
+# Mengabaikan kunci rahasia dan environment
+backend/.env
+frontend/.env
+.env
+
+# Mengabaikan fail data riil dan log
+*.xls
+*.xlsx
+*.csv
+*.log
+
+# Mengabaikan model biner (kecuali Anda ingin menyimpannya, tapi rawan batas ukuran Git)
+# backend/storage/app/public/models/*.pkl
+
+# Mengabaikan Python Virtual Environment & Cache
+engine_ml/venv/
+venv/
+__pycache__/
+*.pyc
