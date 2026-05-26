@@ -2,24 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // MATIKAN SEMENTARA BARIS INI AGAR TIDAK CRASH
-        // $this->call(MedicineSeeder::class);
-
-        // Eksekusi paksa pembuatan akun
-        User::updateOrCreate(
-            ['email' => 'admin@meprofarm.com'],
-            [
-                'name' => 'Bintang (Manager)',
-                'password' => Hash::make('password123'),
-            ]
-        );
+        // Eksekusi seeder secara terpusat dan berurutan
+        $this->call([
+            UserSeeder::class,      // Membangun hierarki pengguna terlebih dahulu
+            MedicineSeeder::class,  // Mengeksekusi injeksi data CSV XGBoost
+        ]);
     }
 }
