@@ -6,6 +6,7 @@ import InputManual from './pages/InputManual';
 import BatchUpload from './pages/BatchUpload';
 import Login from './pages/Login';
 import UserManagement from './pages/UserManagement';
+import ExportReport from './pages/ExportReport';
 
 const ProtectedRoute = () => {
   const token = localStorage.getItem('token');
@@ -36,6 +37,7 @@ function App() {
 
             {/* PERBAIKAN ARSITEKTUR: Rute Manajemen Akun dimasukkan ke dalam Layout */}
             <Route path="users" element={<UserManagement />} />
+            <Route path="export" element={<ExportReport />} />
           </Route>
 
         </Route>

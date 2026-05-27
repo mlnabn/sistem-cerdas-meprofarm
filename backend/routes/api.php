@@ -62,4 +62,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/users/{id}', [UserController::class, 'update']);    // Memperbarui data karyawan
         Route::delete('/users/{id}', [UserController::class, 'destroy']); // Menghapus akun karyawan
     });
+
+    //==================================================================
+    // RUTE TAMBAHAN UNTUK MENGAMBIL RIWAYAT IMPORT
+    //==================================================================
+    Route::get('/import-history', function () {
+        return response()->json([
+            'success' => true,
+            'data' => \App\Models\ImportLog::orderBy('created_at', 'desc')->get()
+        ]);
+    });
 });

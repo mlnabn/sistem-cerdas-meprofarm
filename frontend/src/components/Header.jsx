@@ -1,27 +1,90 @@
-import React from 'react';
-import { Menu, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { LayoutDashboard, Bell, AlertTriangle } from 'lucide-react';
 
-function Header({ isSidebarOpen, setSidebarOpen }) {
-    // Tarik data dinamis dari sesi lokal
-    const user = JSON.parse(localStorage.getItem('user')) || { name: 'User', role: 'staff' };
+function Header() {
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const notifRef = useRef(null);
 
-    // Ekstrak huruf pertama untuk Avatar
-    const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+    useEffect(() => {
+        const timerId = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timerId);
+    }, []);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (notifRef.current && !notifRef.current.contains(event.target)) {
+                setIsNotifOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [notifRef]);
+
+    const formattedDate = currentTime.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    const formattedTime = currentTime.toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
+
+    const notificationData = [
+        { id: 1, name: 'RANITIDINE HCL INJECTION', stock: 12, type: 'FAST MOVING' },
+        { id: 2, name: 'PARACETAMOL SYRUP', stock: 8, type: 'FAST MOVING' },
+    ];
 
     return (
-        <header className="bg-white h-20 border-b flex items-center justify-between px-8">
-            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-gray-100 rounded-lg transition">
-                {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-            <div className="flex items-center gap-4">
-                <div className="text-right">
-                    <p className="text-sm font-bold text-gray-800">{user.name}</p>
-                    <p className={`text-xs font-bold uppercase tracking-wider ${user.role === 'admin' ? 'text-indigo-600' : 'text-gray-500'}`}>
-                        {user.role}
-                    </p>
+        <header className="h-20 bg-white/60 backdrop-blur-md border-b border-[#d8e6df] flex items-center justify-between px-8 shadow-sm shrink-0 relative z-20">
+            <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white border border-[#d8e6df] flex items-center justify-center text-[#4a7c64]">
+                    <LayoutDashboard size={16} />
                 </div>
-                <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold">
-                    {initial}
+                <div>
+                    <h1 className="text-sm font-bold text-[#2c4e3e]">Sistem Cerdas Inventaris</h1>
+                    <p className="text-[11px] font-medium text-[#7a9e8d]">PT Meprofarm — Area Ambarawa</p>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-5">
+                <div className="relative" ref={notifRef}>
+                    <button
+                        onClick={() => setIsNotifOpen(!isNotifOpen)}
+                        className={`transition-colors relative p-1 rounded-md ${isNotifOpen ? 'bg-[#d8e6df] text-[#4a7c64]' : 'text-[#7a9e8d] hover:text-[#4a7c64]'}`}
+                    >
+                        <Bell size={18} />
+                        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-[#ff4d4f] rounded-full border-2 border-white"></span>
+                    </button>
+
+                    {isNotifOpen && (
+                        <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-[#d8e6df] overflow-hidden animate-in fade-in slide-in-from-top-2">
+                            <div className="bg-[#f0f6f3] px-4 py-3 border-b border-[#d8e6df] flex justify-between items-center">
+                                <h3 className="text-xs font-bold text-[#2c4e3e]">Peringatan Inventaris</h3>
+                                <span className="bg-[#ff4d4f] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">{notificationData.length} Kritis</span>
+                            </div>
+                            <div className="max-h-64 overflow-y-auto">
+                                {notificationData.map((notif) => (
+                                    <div key={notif.id} className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                        <div className="flex gap-3">
+                                            <div className="mt-0.5 text-[#ff4d4f]"><AlertTriangle size={16} /></div>
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-800">{notif.name}</p>
+                                                <p className="text-[10px] text-gray-500 mt-1 leading-relaxed">
+                                                    Obat <span className="font-bold text-[#4a7c64]">{notif.type}</span> ini hanya tersisa <span className="font-bold text-[#ff4d4f]">{notif.stock} unit</span>. Lakukan pengadaan ulang.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="h-8 w-px bg-[#d8e6df]"></div>
+
+                <div className="flex items-center gap-4 text-right">
+                    <div className="hidden md:block">
+                        <p className="text-[12px] font-black text-[#2c4e3e] tracking-wide">{formattedDate}</p>
+                        <p className="text-[12px] text-[#52c49a] font-bold mt-0.5 tracking-wider">{formattedTime}</p>
+                    </div>
                 </div>
             </div>
         </header>
