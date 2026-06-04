@@ -16,6 +16,7 @@ class Medicine extends Model
         'recency',
         'class_id',
         'label',
-        'period'
+        'period',
+        'confidence'
     ];
 }

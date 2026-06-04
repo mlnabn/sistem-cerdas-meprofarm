@@ -11,7 +11,6 @@ app = Flask(__name__)
 # 1. INISIALISASI MESIN INFERENSI (LOAD MODEL & SCALER)
 # ==============================================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Pastikan nama file model dan scaler sesuai dengan yang kita buat di Jupyter
 MODEL_PATH = os.path.join(BASE_DIR, 'xgboost_fsm_normalized.joblib')
 SCALER_PATH = os.path.join(BASE_DIR, 'scaler_fsm.joblib')
 
@@ -43,25 +42,27 @@ def predict():
         std_qty = float(data.get('std_qty', 0))
         recency_absolut = float(data.get('recency', 0))
 
-        # Asumsi periode default untuk kalkulasi kecepatan input manual (30 hari)
         total_days = 30
         
-        # Konversi ke rasio kecepatan (Time-Scale Invariant)
         qty_velocity = total_qty / total_days
         trx_velocity = trx_frequency / total_days
         recency_ratio = recency_absolut / total_days
 
-        # Susun fitur (Sesuai urutan saat training)
         X_new = np.array([[qty_velocity, trx_velocity, avg_qty_per_trx, std_qty, recency_ratio]])
         
-        # Z-Score Scaling & Prediksi
+        # Z-Score Scaling & Prediksi (PERBAIKAN V2.0: Tambah Probability)
         X_scaled = scaler.transform(X_new)
-        pred_class = int(xgb_model.predict(X_scaled)[0])
+        predictions = xgb_model.predict(X_scaled)
+        probabilities = xgb_model.predict_proba(X_scaled)
+        
+        pred_class = int(predictions[0])
+        confidence = float(np.max(probabilities[0])) * 100
         
         return jsonify({
             'success': True,
             'class_id': pred_class,
-            'label': DECODE_MAP[pred_class]
+            'label': DECODE_MAP[pred_class],
+            'confidence': round(confidence, 2) # Sekarang ini dikirim ke Laravel
         })
 
     except Exception as e:
@@ -79,32 +80,39 @@ def predict_batch():
         return jsonify({'success': False, 'message': 'Nama file kosong.'}), 400
 
     try:
-        # 1. PEMBACAAN DATA TANGGUH (TARGET SHEET: MASTER)
         if file.filename.endswith('.csv'):
             df = pd.read_csv(file, header=8)
-        else:
-            # Memaksa pandas membaca sheet bernama 'MASTER' secara spesifik
-            df = pd.read_excel(file, sheet_name='MASTER', header=8)
-
-        # Fallback jika metadata memiliki 9 baris kop surat
-        if 'Trx Date' not in df.columns:
-            file.seek(0)
-            if file.filename.endswith('.csv'):
+            if 'Trx Date' not in df.columns:
+                file.seek(0)
                 df = pd.read_csv(file, header=9)
-            else:
-                df = pd.read_excel(file, sheet_name='MASTER', header=9)
+        else:
+            xls = pd.ExcelFile(file)
+            target_sheet = 'MASTER' if 'MASTER' in xls.sheet_names else 0
+            df = pd.read_excel(xls, sheet_name=target_sheet, header=8)
+            if 'Trx Date' not in df.columns:
+                df = pd.read_excel(xls, sheet_name=target_sheet, header=9)
 
         if 'Trx Date' not in df.columns:
-             return jsonify({'success': False, 'message': 'Format tidak valid. Kolom Trx Date tidak ditemukan.'}), 400
+             return jsonify({
+                 'success': False, 
+                 'message': 'Format tidak valid. Kolom "Trx Date" tidak ditemukan. Pastikan file laporan sesuai standar Meprofarm.'
+             }), 400
 
-        # Standarisasi kolom tanggal
         df['Trx Date'] = pd.to_datetime(df['Trx Date'], dayfirst=True, errors='coerce')
         df = df.dropna(subset=['Trx Date'])
         
-        # 2. EKSTRAKSI PERIODE (YYYY-MM)
+        df['Qty User'] = pd.to_numeric(df['Qty User'], errors='coerce')
+        df = df.dropna(subset=['Qty User'])
+        df = df[df['Qty User'] > 0]
+
+        if len(df) == 0:
+             return jsonify({
+                 'success': False, 
+                 'message': 'Validasi Gagal: Seluruh baris data memiliki kuantitas nol, negatif, atau kosong. Pemrosesan AI dibatalkan.'
+             }), 400
+        
         df['Period_YM'] = df['Trx Date'].dt.strftime('%Y-%m')
 
-        # 3. AGREGASI DATA DUA DIMENSI (PER ITEM & PER BULAN)
         agg = df.groupby(['Product Code MEPRO', 'Period_YM']).agg(
             Product_Name    = ('Product Name MEPRO', 'first'),
             Total_Qty       = ('Qty User', 'sum'),
@@ -114,28 +122,28 @@ def predict_batch():
             Last_Trx        = ('Trx Date', 'max'),
         ).reset_index()
 
-        # Kalkulasi hari kalender riil untuk akurasi pembagi kecepatan
         agg['Days_In_Period'] = pd.to_datetime(agg['Period_YM'] + '-01').dt.daysinmonth
         agg['Period_End'] = pd.to_datetime(agg['Period_YM'] + '-01') + pd.offsets.MonthEnd(0)
         agg['Recency_Absolut'] = (agg['Period_End'] - agg['Last_Trx']).dt.days
         agg['Recency_Absolut'] = agg['Recency_Absolut'].clip(lower=0)
         agg['Std_Qty'] = agg['Std_Qty'].fillna(0)
 
-        # 4. NORMALISASI KECEPATAN WAKTU
         agg['Qty_Velocity'] = agg['Total_Qty'] / agg['Days_In_Period']
         agg['Trx_Velocity'] = agg['Trx_Frequency'] / agg['Days_In_Period']
         agg['Recency_Ratio'] = agg['Recency_Absolut'] / agg['Days_In_Period']
 
-        # 5. STANDARISASI & PREDIKSI
         FEAT_COLS = ['Qty_Velocity', 'Trx_Velocity', 'Avg_Qty_Per_Trx', 'Std_Qty', 'Recency_Ratio']
         X_new = agg[FEAT_COLS].values
         X_scaled = scaler.transform(X_new)
+        
         predictions = xgb_model.predict(X_scaled)
+        probabilities = xgb_model.predict_proba(X_scaled) 
 
-        # 6. PENYUSUNAN PAYLOAD JSON 
         results = []
         for i, row in agg.iterrows():
             pred_class = int(predictions[i])
+            confidence = float(np.max(probabilities[i])) * 100 
+            
             results.append({
                 'item_code': str(row['Product Code MEPRO']),
                 'item_name': str(row['Product_Name']),
@@ -146,7 +154,8 @@ def predict_batch():
                 'recency': int(row['Recency_Absolut']), 
                 'class_id': pred_class,
                 'label': DECODE_MAP[pred_class],
-                'period': str(row['Period_YM']) # PERIODE DINAMIS
+                'confidence': round(confidence, 2),
+                'period': str(row['Period_YM'])
             })
 
         return jsonify({'success': True, 'total_processed': len(results), 'data': results})

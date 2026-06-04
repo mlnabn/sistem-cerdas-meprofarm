@@ -7,6 +7,8 @@ import BatchUpload from './pages/BatchUpload';
 import Login from './pages/Login';
 import UserManagement from './pages/UserManagement';
 import ExportReport from './pages/ExportReport';
+import PurchasePlan from './pages/PurchasePlan';
+import HistoryPrediksi from './pages/HistoryPrediksi';
 
 const ProtectedRoute = () => {
   const token = localStorage.getItem('token');
@@ -33,11 +35,16 @@ function App() {
             {/* Rute Fungsionalitas Inti */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="input" element={<InputManual />} />
+            <Route path="history" element={<HistoryPrediksi />} />
             <Route path="upload" element={<BatchUpload />} />
 
             {/* PERBAIKAN ARSITEKTUR: Rute Manajemen Akun dimasukkan ke dalam Layout */}
             <Route path="users" element={<UserManagement />} />
             <Route path="export" element={<ExportReport />} />
+
+            {/* INJEKSI RUTE BARU: Rencana Pembelian (PO) */}
+            <Route path="purchase-plan" element={<PurchasePlan />} />
+
           </Route>
 
         </Route>

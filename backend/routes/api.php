@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/medicines', [MedicineController::class, 'index']);
     Route::post('/medicines/predict', [MedicineController::class, 'predict']);
     Route::post('/medicines/batch', [MedicineController::class, 'batchPredict']);
+    Route::delete('/medicines/rollback', [MedicineController::class, 'rollbackByPeriod']);
 
     // Rute ekstraksi metrik evaluasi ilmiah XGBoost untuk visualisasi antarmuka
     Route::get('/model-metrics', function () {
