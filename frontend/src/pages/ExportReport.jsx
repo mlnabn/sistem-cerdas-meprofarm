@@ -66,7 +66,22 @@ function ExportReport() {
             const url = period ? `/medicines?period=${period}` : '/medicines';
             const response = await api.get(url);
             if (response.data.success) {
-                setMedicines(response.data.data);
+                const rawData = response.data.data;
+
+                // Prioritas Pengurutan Ganda (FSM -> Volume Terbesar)
+                const labelPriority = { 'Fast Moving': 0, 'Medium Moving': 1, 'Slow Moving': 2 };
+
+                const sortedData = rawData.sort((a, b) => {
+                    const priorityA = labelPriority[a.label] !== undefined ? labelPriority[a.label] : 3;
+                    const priorityB = labelPriority[b.label] !== undefined ? labelPriority[b.label] : 3;
+
+                    if (priorityA !== priorityB) {
+                        return priorityA - priorityB;
+                    }
+                    return parseFloat(b.total_qty) - parseFloat(a.total_qty);
+                });
+
+                setMedicines(sortedData);
             }
         } catch (error) {
             console.error("Gagal memuat data:", error);
@@ -87,12 +102,24 @@ function ExportReport() {
         filterCategory === '' || med.label === filterCategory
     );
 
+    // Helper: Renderer Badge BPOM
+    const renderBPOMBadge = (category) => {
+        switch (category) {
+            case 'Obat Bebas': return <div className="w-4 h-4 rounded-full bg-[#10b981] border border-black mx-auto"></div>;
+            case 'Obat Bebas Terbatas': return <div className="w-4 h-4 rounded-full bg-[#3b82f6] border border-black mx-auto"></div>;
+            case 'Obat Keras': return <div className="w-4 h-4 rounded-full bg-[#ef4444] border border-black mx-auto flex items-center justify-center"><span className="text-[8px] font-black text-black">K</span></div>;
+            case 'Obat Narkotika': return <div className="w-4 h-4 rounded-full bg-white border border-[#ef4444] mx-auto flex items-center justify-center"><span className="text-[12px] font-black text-[#ef4444] leading-none mb-0.5">+</span></div>;
+            default: return <span className="text-[8px] font-bold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Belum Diatur</span>;
+        }
+    };
+
     const exportToExcel = () => {
         if (filteredData.length === 0) return alert("Tidak ada data untuk diekspor.");
         const exportData = filteredData.map((item, index) => ({
             'No': index + 1,
             'Kode Item': item.item_code,
             'Nama Item': item.item_name,
+            'Kategori BPOM': item.drug_category || 'Belum Diatur',
             'Total Qty': item.total_qty,
             'Frekuensi Trx': item.trx_frequency,
             'Rata-rata Qty/Trx': item.avg_qty_per_trx,
@@ -117,7 +144,7 @@ function ExportReport() {
         doc.setFontSize(10);
         doc.text(`Periode: ${selectedPeriod || 'Semua'} | Kategori: ${filterCategory || 'Semua FSM'}`, 14, 22);
 
-        const tableColumn = ["No", "Kode Item", "Nama Item", "Total Qty", "Frekuensi", "Rata Qty", "Recency", "Status"];
+        const tableColumn = ["No", "Kode Item", "Nama Item", "Kat. BPOM", "Total Qty", "Frekuensi", "Rata Qty", "Recency", "Status"];
         const tableRows = [];
 
         filteredData.forEach((item, index) => {
@@ -125,6 +152,7 @@ function ExportReport() {
                 index + 1,
                 item.item_code,
                 item.item_name.length > 25 ? item.item_name.substring(0, 25) + '...' : item.item_name,
+                item.drug_category || '-',
                 item.total_qty,
                 item.trx_frequency,
                 item.avg_qty_per_trx,
@@ -232,9 +260,10 @@ function ExportReport() {
                             <thead className="bg-white text-[#64748b] text-[10px] uppercase tracking-widest font-bold sticky top-0 z-10 shadow-sm">
                                 <tr>
                                     <th className="px-6 py-4 border-b border-[#e2e8f0]">Item Obat</th>
-                                    <th className="px-6 py-4 border-b border-[#e2e8f0] text-center">Total Qty</th>
+                                    <th className="px-6 py-4 border-b border-[#e2e8f0] text-center">Kategori</th>
+                                    <th className="px-6 py-4 border-b border-[#e2e8f0] text-center">Total kuantitas</th>
                                     <th className="px-6 py-4 border-b border-[#e2e8f0] text-center">Frekuensi</th>
-                                    <th className="px-6 py-4 border-b border-[#e2e8f0] text-center">Status FSM</th>
+                                    <th className="px-6 py-4 border-b border-[#e2e8f0] text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#e2e8f0] text-sm">
@@ -243,6 +272,12 @@ function ExportReport() {
                                         <td className="px-6 py-3">
                                             <p className="font-bold text-[#1e293b] text-xs">{item.item_name}</p>
                                             <p className="text-[10px] font-mono text-gray-500">{item.item_code}</p>
+                                        </td>
+                                        <td className="px-6 py-3 text-center">
+                                            <div className="flex flex-col items-center justify-center gap-1">
+                                                {renderBPOMBadge(item.drug_category)}
+                                                <span className="text-[8px] font-bold text-slate-500">{item.drug_category || '-'}</span>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-3 text-center text-xs font-medium">{item.total_qty}</td>
                                         <td className="px-6 py-3 text-center text-xs font-medium">{item.trx_frequency}</td>

@@ -89,9 +89,36 @@ function HistoryPrediksi() {
     const totalPages = Math.ceil(filteredMedicines.length / itemsPerPage);
     const currentItems = filteredMedicines.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    // DEKLARASI FUNGSI PAGINATION YANG HILANG
     const handleNextPage = () => { if (currentPage < totalPages) setCurrentPage(prev => prev + 1); };
     const handlePrevPage = () => { if (currentPage > 1) setCurrentPage(prev => prev - 1); };
+
+    // Helper: Renderer Badge BPOM
+    const renderBPOMBadge = (category) => {
+        switch (category) {
+            case 'Obat Bebas':
+                return <div title="Obat Bebas" className="w-5 h-5 rounded-full bg-[#10b981] border-2 border-black shadow-sm mx-auto"></div>;
+            case 'Obat Bebas Terbatas':
+                return <div title="Obat Bebas Terbatas" className="w-5 h-5 rounded-full bg-[#3b82f6] border-2 border-black shadow-sm mx-auto"></div>;
+            case 'Obat Keras':
+                return (
+                    <div title="Obat Keras" className="w-5 h-5 rounded-full bg-[#ef4444] border-2 border-black shadow-sm mx-auto flex items-center justify-center">
+                        <span className="text-[10px] font-black text-black leading-none font-serif">K</span>
+                    </div>
+                );
+            case 'Obat Narkotika':
+                return (
+                    <div title="Obat Narkotika / Psikotropika" className="w-5 h-5 rounded-full bg-white border-2 border-[#ef4444] shadow-sm mx-auto flex items-center justify-center">
+                        <span className="text-[14px] font-black text-[#ef4444] leading-none mb-0.5">+</span>
+                    </div>
+                );
+            default:
+                return (
+                    <span className="text-[9px] font-bold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                        Belum Diatur
+                    </span>
+                );
+        }
+    };
 
     return (
         <div className="space-y-6 pb-10">
@@ -99,10 +126,10 @@ function HistoryPrediksi() {
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#e2e8f0] flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <div>
                     <h1 className="text-xl font-black text-[#1e293b] flex items-center gap-2">
-                        <ShieldCheck className="text-[#4a7c64]" size={24} /> Log Prediksi AI
+                        <ShieldCheck className="text-[#4a7c64]" size={24} /> History Prediksi Klasifikasi
                     </h1>
                     <p className="text-[11px] font-semibold text-[#64748b] mt-1 uppercase tracking-wider">
-                        Tinjauan historis probabilitas dan klasifikasi
+                        Rekam Jejak Klasifikasi untuk Validasi dan Analisis
                     </p>
                 </div>
 
@@ -161,15 +188,16 @@ function HistoryPrediksi() {
                         <thead>
                             <tr className="bg-white text-slate-500 text-[10px] uppercase tracking-widest font-black border-b-2 border-slate-100">
                                 <th className="px-6 py-4">Spesifikasi Item Obat</th>
-                                <th className="px-6 py-4 text-center">Volume Total</th>
-                                <th className="px-6 py-4 text-center">Status Klasifikasi</th>
-                                <th className="px-6 py-4">Confidence Score (Model)</th>
+                                <th className="px-6 py-4 text-center">Total Kuantitas</th>
+                                <th className="px-6 py-4 text-center">Kategori</th>
+                                <th className="px-6 py-4 text-center">Status Label</th>
+                                <th className="px-6 py-4">Nilai Prediksi</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 bg-slate-50/30">
                             {currentItems.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-16 text-center text-slate-400 font-medium">Tidak ada data yang cocok dengan parameter filter Anda.</td>
+                                    <td colSpan="5" className="px-6 py-16 text-center text-slate-400 font-medium">Tidak ada data yang cocok dengan parameter filter Anda.</td>
                                 </tr>
                             ) : (
                                 currentItems.map((med) => (
@@ -184,6 +212,12 @@ function HistoryPrediksi() {
                                         <td className="px-6 py-4 text-center">
                                             <span className="font-mono font-black text-slate-700 text-sm">{med.total_qty}</span>
                                             <span className="text-[10px] text-slate-400 ml-1 font-bold">unit</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex flex-col items-center justify-center gap-1">
+                                                {renderBPOMBadge(med.drug_category)}
+                                                <span className="text-[9px] font-bold text-slate-600 mt-1">{med.drug_category || 'Belum Diatur'}</span>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${med.label === 'Slow Moving' ? 'bg-[#fef2f2] text-[#ef4444] border-[#fecaca]' :
@@ -211,7 +245,7 @@ function HistoryPrediksi() {
                 {totalPages > 1 && (
                     <div className="px-6 py-4 border-t border-[#e2e8f0] flex items-center justify-between bg-white">
                         <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                            Menampilkan <span className="text-slate-800">{(currentPage - 1) * itemsPerPage + 1}</span> - <span className="text-slate-800">{Math.min(currentPage * itemsPerPage, filteredMedicines.length)}</span> dari <span className="text-slate-800">{filteredMedicines.length}</span> Entitas
+                            Menampilkan <span className="text-slate-800">{(currentPage - 1) * itemsPerPage + 1}</span> - <span className="text-slate-800">{Math.min(currentPage * itemsPerPage, filteredMedicines.length)}</span> dari <span className="text-slate-800">{filteredMedicines.length}</span> Baris Data
                         </p>
                         <div className="flex items-center gap-2">
                             <button onClick={handlePrevPage} disabled={currentPage === 1} className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"><ChevronLeft size={16} /></button>

@@ -105,10 +105,10 @@ function InputManual() {
                     <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl">
                         <Wand2 size={24} />
                     </div>
-                    Klasifikasi Prediksi Ad-Hoc
+                    Input Data Manual 
                 </h1>
                 <p className="text-sm font-medium text-[#64748b] mt-2 max-w-2xl leading-relaxed">
-                    Modul ini memfasilitasi injeksi data manual ke dalam mesin inferensi XGBoost. Gunakan fitur *autocomplete* untuk menarik riwayat rekaman produk secara instan dari basis data operasional.
+                    Gunakan formulir ini untuk memasukkan data produk secara manual dan memicu kalkulasi klasifikasi AI. Fitur ini dirancang untuk mempercepat proses inferensi tanpa harus melalui proses upload file, ideal untuk prediksi cepat pada produk baru atau data yang belum terstruktur.
                 </p>
             </div>
 
@@ -145,7 +145,7 @@ function InputManual() {
                                         <input
                                             type="text" required list="medicine-names" value={formData.item_name} onChange={handleNameChange}
                                             className="w-full p-3 bg-slate-50 border border-transparent focus:border-[#4a7c64] focus:bg-white rounded-xl text-sm font-bold text-slate-800 outline-none focus:ring-4 focus:ring-[#4a7c64]/10 transition-all"
-                                            placeholder="Ketik nama untuk auto-fill..."
+                                            placeholder="Ketik nama produk"
                                         />
                                         <datalist id="medicine-names">
                                             {uniqueMedicineNames.map(name => <option key={name} value={name} />)}
@@ -154,7 +154,7 @@ function InputManual() {
 
                                     <div>
                                         <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><Hash size={12} /> Kode SKU Obat</label>
-                                        <input type="text" required value={formData.item_code} onChange={(e) => setFormData({ ...formData, item_code: e.target.value })} className="w-full p-3 bg-slate-50 border border-transparent focus:border-[#4a7c64] focus:bg-white rounded-xl text-sm font-bold text-slate-800 outline-none focus:ring-4 focus:ring-[#4a7c64]/10 transition-all" placeholder="Misal: MD-001" />
+                                        <input type="text" required value={formData.item_code} onChange={(e) => setFormData({ ...formData, item_code: e.target.value })} className="w-full p-3 bg-slate-50 border border-transparent focus:border-[#4a7c64] focus:bg-white rounded-xl text-sm font-bold text-slate-800 outline-none focus:ring-4 focus:ring-[#4a7c64]/10 transition-all" placeholder="Misal: 103700308" />
                                     </div>
                                 </div>
                             </div>
@@ -164,7 +164,7 @@ function InputManual() {
                         <div className="lg:col-span-8">
                             <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-[#e2e8f0] h-full flex flex-col">
                                 <h3 className="text-sm font-black text-[#1e293b] flex items-center gap-2 mb-6 border-b border-slate-100 pb-3">
-                                    <Activity size={16} className="text-indigo-500" /> Parameter Variabel Independen (XGBoost Features)
+                                    <Activity size={16} className="text-indigo-500" /> Parameter Kalkulasi
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 flex-grow">

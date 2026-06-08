@@ -9,6 +9,7 @@ import UserManagement from './pages/UserManagement';
 import ExportReport from './pages/ExportReport';
 import PurchasePlan from './pages/PurchasePlan';
 import HistoryPrediksi from './pages/HistoryPrediksi';
+import MasterObat from './pages/MasterObat';
 
 const ProtectedRoute = () => {
   const token = localStorage.getItem('token');
@@ -34,6 +35,7 @@ function App() {
 
             {/* Rute Fungsionalitas Inti */}
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="master-obat" element={<MasterObat />} />
             <Route path="input" element={<InputManual />} />
             <Route path="history" element={<HistoryPrediksi />} />
             <Route path="upload" element={<BatchUpload />} />

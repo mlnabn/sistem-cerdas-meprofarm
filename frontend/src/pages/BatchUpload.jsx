@@ -109,8 +109,8 @@ function BatchUpload() {
     return (
         <div className="space-y-6 pb-10">
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#e2e8f0]">
-                <h1 className="text-xl font-black text-[#1e293b]">Integrasi Data & Mitigasi</h1>
-                <p className="text-[11px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Pemrosesan Massal (Batch ETL) & Rollback Sistem</p>
+                <h1 className="text-xl font-black text-[#1e293b]">Upload File SMS</h1>
+                <p className="text-[11px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Proses upload file dalam format CSV atau Excel</p>
             </div>
 
             {/* BLOKIR AKSES UNTUK STAFF */}
@@ -136,9 +136,9 @@ function BatchUpload() {
                             <UploadCloud size={32} className="text-[#4a7c64]" />
                         </div>
 
-                        <h2 className="text-lg font-black text-[#1e293b]">Batch Upload Data Mentah</h2>
+                        <h2 className="text-lg font-black text-[#1e293b]">Upload File SMS </h2>
                         <p className="text-[#64748b] mt-2 text-center max-w-md text-xs leading-relaxed mb-6">
-                            Sistem telah dilengkapi <b>Sanity Check AI</b>. Baris data dengan kuantitas nol, negatif, atau bernilai <i>Null</i> akan secara otomatis disingkirkan sebelum proses klasifikasi.
+                            Unggah dokumen Excel atau CSV yang berisi data produk untuk diproses oleh mesin inferensi AI. Pastikan format file sesuai dengan template yang disediakan untuk memastikan keberhasilan klasifikasi.
                         </p>
 
                         <input type="file" id="file-upload" accept=".csv, .xls, .xlsx" className="hidden" onChange={handleFileChange} />
@@ -176,18 +176,18 @@ function BatchUpload() {
                                 <RotateCcw size={20} />
                             </div>
                             <div>
-                                <h3 className="text-sm font-black text-slate-800">Mekanisme Rollback</h3>
-                                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-0.5">Mitigasi Kesalahan Unggah</p>
+                                <h3 className="text-sm font-black text-slate-800">Mitigasi Kesalahan Unggah</h3>
+                                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-0.5">Fitur untuk memperbaiki kesalahan yang terjadi selama proses upload</p>
                             </div>
                         </div>
 
                         <p className="text-xs text-slate-600 leading-relaxed mb-6 flex-1">
-                            Gunakan fitur ini <b>hanya</b> jika terjadi kesalahan fatal pada dokumen Excel yang telah diunggah. Seluruh data prediksi XGBoost pada periode terpilih akan dimusnahkan.
+                            Jika terjadi kesalahan dalam proses upload atau klasifikasi, Anda dapat menggunakan fitur mitigasi ini untuk menghapus data yang bermasalah berdasarkan periode tertentu. Pastikan untuk memilih periode yang tepat sebelum mengeksekusi tindakan ini, karena semua data klasifikasi untuk periode tersebut akan dihapus secara permanen.
                         </p>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-[10px] font-black text-slate-700 uppercase tracking-widest mb-2">Target Periode Rollback</label>
+                                <label className="block text-[10px] font-black text-slate-700 uppercase tracking-widest mb-2">Pilih Periode untuk Mitigasi</label>
                                 <select
                                     value={selectedRollbackPeriod}
                                     onChange={(e) => setSelectedRollbackPeriod(e.target.value)}
@@ -223,9 +223,9 @@ function BatchUpload() {
                     <table className="w-full text-left relative">
                         <thead className="bg-white text-[#64748b] text-[10px] uppercase font-bold border-b border-[#e2e8f0] sticky top-0 z-10">
                             <tr>
-                                <th className="px-6 py-4">Tindakan / Nama Dokumen</th>
-                                <th className="px-6 py-4 text-center">Status Eksekusi</th>
-                                <th className="px-6 py-4 text-right">Tanda Waktu (Timestamp)</th>
+                                <th className="px-6 py-4">Nama Dokumen</th>
+                                <th className="px-6 py-4 text-center">Status</th>
+                                <th className="px-6 py-4 text-right">Waktu</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#e2e8f0] text-sm">

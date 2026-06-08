@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Medicine;
 use App\Models\ImportLog;
+use App\Models\MasterMedicine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -15,10 +16,20 @@ class MedicineController extends Controller
         $query = Medicine::query();
 
         if ($request->has('period') && $request->period != '') {
-            $query->where('period', 'LIKE', $request->period . '%');
+            // REVISI LOGIKA: Cegah tumpang tindih antara "2023" tunggal/bulanan dengan "2023-2025 (Baseline)"
+            if ($request->period === '2023-2025 (Baseline)') {
+                $query->where('period', $request->period);
+            } else {
+                $query->where('period', 'LIKE', $request->period . '%')
+                    ->where('period', '!=', '2023-2025 (Baseline)'); // 
+            }
         }
 
-        $medicines = $query->orderBy('class_id', 'desc')->get();
+        // Urutkan Class ID Ascending (0=Fast, 1=Medium, 2=Slow), lalu Total Qty Descending
+        $medicines = $query->orderBy('class_id', 'asc')
+            ->orderBy('total_qty', 'desc')
+            ->get();
+
         return response()->json(['success' => true, 'data' => $medicines], 200);
     }
 
@@ -46,10 +57,24 @@ class MedicineController extends Controller
                 $processedCount = 0;
 
                 foreach ($result['data'] as $item) {
+
+                    // 1. LOOKUP KE KAMUS MASTER: 
+                    // Cari obat berdasarkan item_code. Jika tidak ada, otomatis buat baru dengan status 'Belum Dikategorikan'
+                    $master = MasterMedicine::firstOrCreate(
+                        ['item_code' => $item['item_code']],
+                        [
+                            'item_name' => $item['item_name'],
+                            'drug_category' => 'Belum Dikategorikan'
+                        ]
+                    );
+
+                    // 2. SIMPAN RIWAYAT PREDIKSI:
+                    // Simpan ke tabel medicines dan suntikkan 'drug_category' dari kamus master yang didapat di atas
                     Medicine::updateOrCreate(
                         ['item_code' => $item['item_code'], 'period' => $item['period']],
                         [
                             'item_name' => $item['item_name'],
+                            'drug_category' => $master->drug_category, // <-- INJEKSI KATEGORI DI SINI
                             'total_qty' => $item['total_qty'],
                             'trx_frequency' => $item['trx_frequency'],
                             'avg_qty_per_trx' => $item['avg_qty_per_trx'],
@@ -60,6 +85,7 @@ class MedicineController extends Controller
                             'confidence' => $item['confidence'] ?? null,
                         ]
                     );
+
                     $processedCount++;
                 }
 
@@ -148,6 +174,47 @@ class MedicineController extends Controller
             return response()->json(['success' => false, 'message' => 'Tidak ada data yang ditemukan untuk periode tersebut.'], 404);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Gagal melakukan rollback: ' . $e->getMessage()], 500);
+        }
+    }
+    public function updateDrugCategory(Request $request)
+    {
+        $request->validate([
+            'item_code' => 'required|string',
+            'item_name' => 'required|string',
+            'drug_category' => 'required|string',
+        ]);
+
+        try {
+            // 1. Update atau Buat data di Kamus Master (Single Source of Truth)
+            $master = MasterMedicine::updateOrCreate(
+                ['item_code' => $request->item_code],
+                [
+                    'item_name' => $request->item_name,
+                    'drug_category' => $request->drug_category
+                ]
+            );
+
+            // 2. Sinkronisasi (Timpa) seluruh data riwayat di tabel medicines agar kategorinya ikut berubah
+            Medicine::where('item_code', $request->item_code)
+                ->update(['drug_category' => $request->drug_category]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Kategori obat berhasil diperbarui dan disinkronkan ke seluruh riwayat.',
+                'data' => $master
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui kategori: ' . $e->getMessage()], 500);
+        }
+    }
+    public function getMasterMedicines()
+    {
+        try {
+            // Mengambil semua kamus obat, diurutkan berdasarkan nama secara alfabetis
+            $masters = MasterMedicine::orderBy('item_name', 'asc')->get();
+            return response()->json(['success' => true, 'data' => $masters], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal memuat master data.'], 500);
         }
     }
 }

@@ -180,7 +180,7 @@ function Dashboard() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-[#e2e8f0]">
                 <div>
                     <h1 className="text-xl font-black text-[#1e293b]">Dashboard</h1>
-                    <p className="text-[11px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Metrik Klasifikasi & Aksi Persediaan</p>
+                    <p className="text-[11px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Metrik & Aksi </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-2 bg-[#f8fafc] px-3 py-2 rounded-xl border border-[#e2e8f0]">
@@ -344,8 +344,8 @@ function Dashboard() {
                 <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-[#e2e8f0]">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h4 className="font-black text-sm text-[#1e293b]">Bobot Pengaruh Fitur (Feature Importance)</h4>
-                            <p className="text-[10px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Analisis Mesin XGBoost</p>
+                            <h4 className="font-black text-sm text-[#1e293b]">Fitur Paling Berpengaruh</h4>
+                            <p className="text-[10px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Analisis</p>
                         </div>
                     </div>
                     <div className="h-64">

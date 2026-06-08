@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../api';
-import { LayoutDashboard, FileInput, UploadCloud, LogOut, Users, Package, Download, ShoppingCart, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, FileInput, UploadCloud, LogOut, Users, Package, Download, ShoppingCart, ShieldCheck, Database } from 'lucide-react';
 
 function Sidebar() {
     const navigate = useNavigate();
@@ -63,6 +63,7 @@ function Sidebar() {
         {
             title: 'DATA',
             items: [
+                { path: '/master-obat', name: 'Master Obat', icon: <Database size={18} /> },
                 { path: '/input', name: 'Input Data', icon: <FileInput size={18} /> },
                 { path: '/history', name: 'Riwayat Prediksi', icon: <ShieldCheck size={18} /> },
                 { path: '/upload', name: 'Batch Upload', icon: <UploadCloud size={18} /> },

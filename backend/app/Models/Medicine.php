@@ -9,6 +9,7 @@ class Medicine extends Model
     protected $fillable = [
         'item_code',
         'item_name',
+        'drug_category',
         'total_qty',
         'trx_frequency',
         'avg_qty_per_trx',
