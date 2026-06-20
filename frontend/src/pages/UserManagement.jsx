@@ -92,7 +92,7 @@ const UserManagement = () => {
                     <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <Shield className="text-indigo-600" /> Manajemen Akses Karyawan
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">Kontrol otorisasi (RBAC) sistem cerdas Meprofarm.</p>
+                    <p className="text-sm text-gray-500 mt-1">Kontrol User Access</p>
                 </div>
             </div>
 

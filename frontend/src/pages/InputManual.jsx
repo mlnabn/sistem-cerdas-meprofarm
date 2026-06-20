@@ -102,14 +102,12 @@ function InputManual() {
             {/* Header Halaman Menyatu dengan Background */}
             <div>
                 <h1 className="text-2xl font-black text-[#1e293b] flex items-center gap-3">
-                    <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl">
+                    <div className="w-8 h-8 rounded-full bg-[#4a7c64]/20 flex items-center justify-center text-[#4a7c64]">
                         <Wand2 size={24} />
                     </div>
                     Input Data Manual 
                 </h1>
-                <p className="text-sm font-medium text-[#64748b] mt-2 max-w-2xl leading-relaxed">
-                    Gunakan formulir ini untuk memasukkan data produk secara manual dan memicu kalkulasi klasifikasi AI. Fitur ini dirancang untuk mempercepat proses inferensi tanpa harus melalui proses upload file, ideal untuk prediksi cepat pada produk baru atau data yang belum terstruktur.
-                </p>
+                
             </div>
 
             {!isAdmin ? (

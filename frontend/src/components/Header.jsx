@@ -80,7 +80,7 @@ function Header() {
                 </div>
                 <div>
                     <h1 className="text-sm font-bold text-[#2c4e3e]">Sistem Cerdas Inventaris</h1>
-                    <p className="text-[11px] font-medium text-[#7a9e8d]">PT Meprofarm — Area Ambarawa</p>
+                    <p className="text-[11px] font-medium text-[#7a9e8d]">SmartMove Pharmacy</p>
                 </div>
             </div>
 

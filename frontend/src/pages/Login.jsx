@@ -7,7 +7,7 @@ import { Lock, Mail, Loader2 } from 'lucide-react';
 
 // 1. IMPORT ASET LOGO DI SINI
 // Pastikan file logo-meprofarm.png yang sudah benar-benar transparan ada di folder src/assets/
-import logoMepro from '../assets/logo-meprofarm.png';
+import logoMepro from '../assets/logo.png';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -71,8 +71,8 @@ const Login = () => {
 
                 <div className="w-full md:w-1/2 p-8 lg:p-14 flex flex-col justify-center bg-white/50">
                     <div className="mb-8 text-center md:text-left">
-                        <h2 className="text-3xl font-extrabold text-[#2d4a42] tracking-tight">Otorisasi Sistem</h2>
-                        <p className="text-sm text-[#5a7a71] mt-2 font-medium">PT Meprofarm - Sistem Cerdas Klasifikasi Inventaris</p>
+                        <h2 className="text-3xl font-extrabold text-[#2d4a42] tracking-tight">SmartMove Pharmacy</h2>
+                        <p className="text-sm text-[#5a7a71] mt-2 font-medium">Sistem Cerdas Klasifikasi Inventaris Obat</p>
                     </div>
 
                     {error && (
@@ -83,7 +83,7 @@ const Login = () => {
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
-                            <label className="block text-xs font-bold text-[#456158] uppercase tracking-wider mb-2 ml-1">Surel Internal</label>
+                            <label className="block text-xs font-bold text-[#456158] uppercase tracking-wider mb-2 ml-1">Email</label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7c9e95]" size={20} />
                                 <input
@@ -92,13 +92,13 @@ const Login = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full pl-12 pr-4 py-3.5 bg-white/60 border border-white/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7c9e95] focus:bg-white text-[#2d4a42] font-medium transition-all placeholder-[#9db5ad] shadow-sm"
-                                    placeholder="admin@meprofarm.com"
+                                    placeholder="Email"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-[#456158] uppercase tracking-wider mb-2 ml-1">Kata Sandi Akses</label>
+                            <label className="block text-xs font-bold text-[#456158] uppercase tracking-wider mb-2 ml-1">Password</label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7c9e95]" size={20} />
                                 <input
@@ -124,7 +124,7 @@ const Login = () => {
                                         <span>Memverifikasi Otoritas...</span>
                                     </>
                                 ) : (
-                                    'Masuk ke Dasbor Analitik'
+                                    'Login'
                                 )}
                             </button>
                         </div>
@@ -149,7 +149,7 @@ const Login = () => {
                         
                         <div className="h-1 w-16 bg-white/50 mx-auto rounded-full mb-4"></div>
                         <p className="text-emerald-50/90 text-sm leading-relaxed max-w-sm mx-auto font-medium">
-                            Mesin inferensi klasifikasi Fast, Medium, dan Slow (FSM) untuk optimalisasi distribusi gudang farmasi.
+                            Sistem klasifikasi Fast, Medium, dan Slow (FSM) untuk optimalisasi distribusi di gudang farmasi.
                         </p>
                     </div>
                 </div>

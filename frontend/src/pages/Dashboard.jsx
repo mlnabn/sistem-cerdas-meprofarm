@@ -180,7 +180,7 @@ function Dashboard() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-[#e2e8f0]">
                 <div>
                     <h1 className="text-xl font-black text-[#1e293b]">Dashboard</h1>
-                    <p className="text-[11px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Metrik & Aksi </p>
+                    <p className="text-[11px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Analytics & Actions</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-2 bg-[#f8fafc] px-3 py-2 rounded-xl border border-[#e2e8f0]">
@@ -233,7 +233,7 @@ function Dashboard() {
                 <div className="p-6 border-b border-[#e2e8f0] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#f8fafc]">
                     <div>
                         <h4 className="font-black text-sm text-[#1e293b]">Tindakan Operasional</h4>
-                        <p className="text-[10px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Manajemen Defisit Stok (Fast Moving)</p>
+                        <p className="text-[10px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Manajemen Stok (Fast Moving)</p>
                     </div>
 
                     <div className="flex bg-slate-200 p-1 rounded-xl shadow-inner w-full sm:w-auto">
@@ -281,7 +281,7 @@ function Dashboard() {
                             {activeAlerts.length === 0 && (
                                 <div className="h-24 flex flex-col items-center justify-center text-slate-400 font-medium border-2 border-dashed border-slate-200 rounded-xl">
                                     <BrainCircuit size={24} className="mb-2 opacity-50" />
-                                    <p className="text-xs">Tidak ada peringatan kritis aktif.</p>
+                                    <p className="text-xs">Tidak ada peringatan kritis.</p>
                                 </div>
                             )}
                         </>
@@ -326,7 +326,7 @@ function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="col-span-2 md:col-span-4 flex items-center gap-2 px-2 pt-2">
                     <BrainCircuit className="text-[#3b82f6]" size={18} />
-                    <h2 className="text-sm font-bold text-[#334155]">Performa Model Klasifikasi (XGBoost)</h2>
+                    <h2 className="text-sm font-bold text-[#334155]">Performa Model Klasifikasi</h2>
                 </div>
                 {loadingMetrics ? (
                     <div className="col-span-4 text-xs text-slate-400 animate-pulse px-2">Memuat metrik AI...</div>
@@ -365,7 +365,7 @@ function Dashboard() {
 
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#e2e8f0]">
                     <h4 className="font-black text-sm text-[#1e293b] mb-1">Proporsi Klasifikasi FSM</h4>
-                    <p className="text-[10px] font-semibold text-[#64748b] mb-4 uppercase tracking-wider">Distribusi Dataset</p>
+                    <p className="text-[10px] font-semibold text-[#64748b] mb-4 uppercase tracking-wider">Distribusi Data</p>
                     <div className="h-56">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>

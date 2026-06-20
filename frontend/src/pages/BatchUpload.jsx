@@ -155,7 +155,7 @@ function BatchUpload() {
                                 className={`px-6 py-3 rounded-xl text-sm font-bold text-white transition shadow-md flex items-center justify-center gap-2 shrink-0
                                     ${!file || loading || rollbackLoading ? 'bg-slate-300 cursor-not-allowed text-slate-500 shadow-none' : 'bg-[#2c4e3e] hover:bg-[#1f382d]'}`}
                             >
-                                {loading ? <><Loader2 className="animate-spin" size={18} /> Memproses AI...</> : 'Eksekusi Klasifikasi'}
+                                {loading ? <><Loader2 className="animate-spin" size={18} /> Memproses AI...</> : 'Klasifikasi'}
                             </button>
                         </div>
 

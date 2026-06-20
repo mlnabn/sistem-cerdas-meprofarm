@@ -126,7 +126,7 @@ function HistoryPrediksi() {
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#e2e8f0] flex flex-col lg:flex-row gap-4 items-center justify-between">
                 <div>
                     <h1 className="text-xl font-black text-[#1e293b] flex items-center gap-2">
-                        <ShieldCheck className="text-[#4a7c64]" size={24} /> History Prediksi Klasifikasi
+                        <ShieldCheck className="text-[#4a7c64]" size={24} />Prediksi Klasifikasi
                     </h1>
                     <p className="text-[11px] font-semibold text-[#64748b] mt-1 uppercase tracking-wider">
                         Rekam Jejak Klasifikasi untuk Validasi dan Analisis

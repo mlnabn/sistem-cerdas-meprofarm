@@ -107,7 +107,7 @@ function MasterObat() {
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#e2e8f0] flex flex-col lg:flex-row justify-between items-center gap-4">
                 <div>
                     <h1 className="text-xl font-black text-[#1e293b] flex items-center gap-2">
-                        <Database className="text-[#4a7c64]" size={24} /> Master Obat / Produk
+                        <Database className="text-[#4a7c64]" size={24} /> Data Obat / Produk
                     </h1>
                     <p className="text-[11px] font-semibold text-[#64748b] mt-0.5 uppercase tracking-wider">Kelola standardisasi kategori BPOM untuk seluruh sistem</p>
                 </div>

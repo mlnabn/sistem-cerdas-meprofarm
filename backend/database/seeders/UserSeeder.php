@@ -12,20 +12,20 @@ class UserSeeder extends Seeder
     {
         // 1. Provokasi Akun Super Admin (Memiliki Hak Akses Penuh)
         User::updateOrCreate(
-            ['email' => 'admin@meprofarm.com'],
+            ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Bintang (Manager)',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('admin123'),
                 'role' => 'admin' // Parameter Kritis RBAC
             ]
         );
 
         // 2. Provokasi Akun Staf (Untuk Pengujian Keamanan Blackbox)
         User::updateOrCreate(
-            ['email' => 'staff@meprofarm.com'],
+            ['email' => 'staff@gmail.com'],
             [
                 'name' => 'Staf Gudang',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('staff123'),
                 'role' => 'staff' // Parameter Kritis RBAC
             ]
         );

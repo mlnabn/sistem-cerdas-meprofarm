@@ -63,11 +63,11 @@ function Sidebar() {
         {
             title: 'DATA',
             items: [
-                { path: '/master-obat', name: 'Master Obat', icon: <Database size={18} /> },
+                { path: '/master-obat', name: 'Data Obat', icon: <Database size={18} /> },
                 { path: '/input', name: 'Input Data', icon: <FileInput size={18} /> },
-                { path: '/history', name: 'Riwayat Prediksi', icon: <ShieldCheck size={18} /> },
-                { path: '/upload', name: 'Batch Upload', icon: <UploadCloud size={18} /> },
-                { path: '/export', name: 'Laporan Ekspor', icon: <Download size={18} /> },
+                { path: '/history', name: 'Prediksi', icon: <ShieldCheck size={18} /> },
+                { path: '/upload', name: 'Upload Data', icon: <UploadCloud size={18} /> },
+                { path: '/export', name: 'Laporan', icon: <Download size={18} /> },
             ]
         }
     ];
@@ -95,8 +95,8 @@ function Sidebar() {
                 </div>
                 <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'opacity-100 w-auto ml-3 visible' : 'opacity-0 w-0 invisible ml-0'
                     }`}>
-                    <h2 className="font-bold text-white text-base tracking-wide leading-tight whitespace-nowrap">MeproSmart</h2>
-                    <p className="text-[10px] text-[#a5c7b7] font-medium mt-0.5 whitespace-nowrap">PT Meprofarm • Ambarawa</p>
+                    <h2 className="font-bold text-white text-base tracking-wide leading-tight whitespace-nowrap">SmartMove</h2>
+                    <p className="text-[10px] text-[#a5c7b7] font-medium mt-0.5 whitespace-nowrap">Sistem Manajemen Distribusi Obat</p>
                 </div>
             </div>
 
