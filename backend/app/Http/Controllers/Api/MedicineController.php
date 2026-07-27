@@ -11,6 +11,35 @@ use Illuminate\Support\Facades\Http;
 
 class MedicineController extends Controller
 {
+    public function import(Request $request)
+    {
+        $request->validate(['file' => 'required|file|mimes:csv,txt']);
+
+        $log = $this->createImportLog(
+            'CSV IMPORT - ' . $request->file('file')->getClientOriginalName(),
+            'success',
+            $request->user()->id
+        );
+
+        $file = fopen($request->file('file')->getRealPath(), 'r');
+        $header = fgetcsv($file);
+
+        while (($row = fgetcsv($file)) !== false) {
+            $data = array_combine($header, $row);
+
+            Medicine::create([
+                'item_code' => $data['item_code'],
+                'item_name' => $data['item_name'],
+                'total_qty' => $data['total_qty'],
+                'import_log_id' => $log->id,
+            ]);
+        }
+
+        fclose($file);
+
+        return response()->json(['success' => true, 'message' => 'Data berhasil diimpor.']);
+    }
+
     public function index(Request $request)
     {
         $query = Medicine::query();
@@ -45,6 +74,8 @@ class MedicineController extends Controller
         $file = $request->file('file');
         $fileName = $file->getClientOriginalName();
 
+        $log = $this->createImportLog('BATCH PREDICT - ' . $fileName, 'processing', $request->user()->id);
+
         try {
             $response = Http::timeout(90)->attach(
                 'file',
@@ -57,24 +88,19 @@ class MedicineController extends Controller
                 $processedCount = 0;
 
                 foreach ($result['data'] as $item) {
-
-                    // 1. LOOKUP KE KAMUS MASTER: 
-                    // Cari obat berdasarkan item_code. Jika tidak ada, otomatis buat baru dengan status 'Belum Dikategorikan'
                     $master = MasterMedicine::firstOrCreate(
                         ['item_code' => $item['item_code']],
                         [
                             'item_name' => $item['item_name'],
-                            'drug_category' => 'Belum Dikategorikan'
+                            'drug_category' => 'Belum Dikategorikan',
                         ]
                     );
 
-                    // 2. SIMPAN RIWAYAT PREDIKSI:
-                    // Simpan ke tabel medicines dan suntikkan 'drug_category' dari kamus master yang didapat di atas
                     Medicine::updateOrCreate(
                         ['item_code' => $item['item_code'], 'period' => $item['period']],
                         [
                             'item_name' => $item['item_name'],
-                            'drug_category' => $master->drug_category, // <-- INJEKSI KATEGORI DI SINI
+                            'drug_category' => $master->drug_category,
                             'total_qty' => $item['total_qty'],
                             'trx_frequency' => $item['trx_frequency'],
                             'avg_qty_per_trx' => $item['avg_qty_per_trx'],
@@ -83,25 +109,26 @@ class MedicineController extends Controller
                             'class_id' => $item['class_id'],
                             'label' => $item['label'],
                             'confidence' => $item['confidence'] ?? null,
-                        ]
+                            'import_log_id' => $log->id,
+                        ],
                     );
 
                     $processedCount++;
                 }
 
-                ImportLog::create([
-                    'file_name' => $fileName,
-                    'status'    => 'success'
-                ]);
+                $log->update(['status' => 'success']);
 
-                return response()->json(['success' => true, 'message' => "Sukses memproses {$processedCount} rekaman data deret waktu."]);
+                return response()->json([
+                    'success' => true,
+                    'message' => "Berhasil memproses {$processedCount} data."
+                ]);
             }
 
-            ImportLog::create(['file_name' => $fileName, 'status' => 'error']);
-            return response()->json(['success' => false, 'message' => 'Gagal terhubung ke AI Engine.'], 502);
+            $log->update(['status' => 'error']);
+            return response()->json(['success' => false, 'message' => 'Tidak dapat terhubung ke AI Engine.'], 502);
         } catch (\Exception $e) {
-            ImportLog::create(['file_name' => $fileName, 'status' => 'error']);
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            $log->update(['status' => 'error']);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan saat memproses batch.'], 500);
         }
     }
 
@@ -119,13 +146,18 @@ class MedicineController extends Controller
             'period' => 'required'
         ]);
 
+        $log = $this->createImportLog(
+            "MANUAL INPUT - {$request->item_code} - {$request->period}",
+            'processing',
+            $request->user()->id
+        );
+
         try {
             $response = Http::timeout(30)->post('http://127.0.0.1:5000/api/predict', $request->all());
 
             if ($response->successful()) {
                 $result = $response->json();
 
-                // PERBAIKAN V2.0: Menangkap kolom confidence dari Python
                 $medicine = Medicine::updateOrCreate(
                     ['item_code' => $request->item_code, 'period' => $request->period],
                     [
@@ -137,16 +169,24 @@ class MedicineController extends Controller
                         'recency' => $request->recency,
                         'class_id' => $result['class_id'],
                         'label' => $result['label'],
-                        'confidence' => $result['confidence'] ?? null, // PASTIKAN INI TERSIMPAN
+                        'confidence' => $result['confidence'] ?? null,
                     ]
                 );
 
-                return response()->json(['success' => true, 'message' => 'Klasifikasi berhasil disimpan.', 'data' => $medicine]);
+                $log->update(['status' => 'success']);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Klasifikasi berhasil disimpan.',
+                    'data' => $medicine
+                ]);
             }
 
+            $log->update(['status' => 'error']);
             return response()->json(['success' => false, 'message' => 'Gagal memproses prediksi dari AI Engine.'], 502);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Internal Server Error: ' . $e->getMessage()], 500);
+            $log->update(['status' => 'error']);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan saat memproses prediksi.'], 500);
         }
     }
 
@@ -157,25 +197,23 @@ class MedicineController extends Controller
         ]);
 
         try {
-            $deletedCount = Medicine::where('period', 'LIKE', $request->period . '%')->delete();
+            $deletedCount = Medicine::where('period', $request->period)->delete();
 
             if ($deletedCount > 0) {
-                ImportLog::create([
-                    'file_name' => "ROLLBACK PERIODE: {$request->period}",
-                    'status'    => 'success'
-                ]);
+                $this->createImportLog("ROLLBACK - {$request->period}", 'success', $request->user()->id);
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Rollback berhasil. {$deletedCount} data klasifikasi pada periode {$request->period} telah dihapus dari sistem."
+                    'message' => "Rollback berhasil. {$deletedCount} data pada periode {$request->period} telah dihapus."
                 ]);
             }
 
             return response()->json(['success' => false, 'message' => 'Tidak ada data yang ditemukan untuk periode tersebut.'], 404);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal melakukan rollback: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan saat melakukan rollback.'], 500);
         }
     }
+
     public function updateDrugCategory(Request $request)
     {
         $request->validate([
@@ -185,36 +223,44 @@ class MedicineController extends Controller
         ]);
 
         try {
-            // 1. Update atau Buat data di Kamus Master (Single Source of Truth)
             $master = MasterMedicine::updateOrCreate(
                 ['item_code' => $request->item_code],
                 [
                     'item_name' => $request->item_name,
-                    'drug_category' => $request->drug_category
+                    'drug_category' => $request->drug_category,
                 ]
             );
 
-            // 2. Sinkronisasi (Timpa) seluruh data riwayat di tabel medicines agar kategorinya ikut berubah
             Medicine::where('item_code', $request->item_code)
                 ->update(['drug_category' => $request->drug_category]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Kategori obat berhasil diperbarui dan disinkronkan ke seluruh riwayat.',
+                'message' => 'Kategori obat berhasil diperbarui dan disinkronkan.',
                 'data' => $master
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal memperbarui kategori: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan saat memperbarui kategori.'], 500);
         }
     }
+
     public function getMasterMedicines()
     {
         try {
-            // Mengambil semua kamus obat, diurutkan berdasarkan nama secara alfabetis
             $masters = MasterMedicine::orderBy('item_name', 'asc')->get();
             return response()->json(['success' => true, 'data' => $masters], 200);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal memuat master data.'], 500);
+            return response()->json(['success' => false, 'message' => 'Gagal memuat data master obat.'], 500);
         }
+    }
+
+    private function createImportLog(string $fileName, string $status, ?int $userId): ImportLog
+    {
+        return ImportLog::create([
+            'file_name' => $fileName,
+            'status' => $status,
+            'user_id' => $userId,
+            'created_at' => now(),
+        ]);
     }
 }

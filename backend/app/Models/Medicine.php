@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ImportLog;
 
 class Medicine extends Model
 {
@@ -18,6 +19,11 @@ class Medicine extends Model
         'class_id',
         'label',
         'period',
-        'confidence'
+        'confidence',
+        'import_log_id'
     ];
+
+    public function importLog() {
+        return $this->belongsTo(ImportLog::class);
+    }
 }

@@ -71,7 +71,7 @@ const Login = () => {
 
                 <div className="w-full md:w-1/2 p-8 lg:p-14 flex flex-col justify-center bg-white/50">
                     <div className="mb-8 text-center md:text-left">
-                        <h2 className="text-3xl font-extrabold text-[#2d4a42] tracking-tight">SmartMove Pharmacy</h2>
+                        <h2 className="text-3xl font-extrabold text-[#2d4a42] tracking-tight">MeproFarm Smart</h2>
                         <p className="text-sm text-[#5a7a71] mt-2 font-medium">Sistem Cerdas Klasifikasi Inventaris Obat</p>
                     </div>
 

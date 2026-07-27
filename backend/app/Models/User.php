@@ -11,6 +11,11 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable; // 2. SUNTIKKAN TRAIT DI SINI
 
+    public function importLogs()
+    {
+        return $this->hasMany(ImportLog::class);
+    }
+
     /**
      * The attributes that are mass assignable.
      *

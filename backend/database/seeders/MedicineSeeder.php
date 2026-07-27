@@ -4,24 +4,29 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Medicine;
+use App\Models\ImportLog; // <--- Tambahkan ini
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 
 class MedicineSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // 1. PEMUSNAHAN DATA LAMA (WAJIB)
-        // Menghapus seluruh data cacat sebelumnya agar tidak merusak metrik di Dasbor
+        // 1. PEMUSNAHAN DATA LAMA
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('medicines')->truncate();
+        DB::table('import_logs')->truncate(); // Bersihkan log lama juga
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // 2. LOKASI FILE CSV
-        // Menyesuaikan dengan lokasi yang Anda sebutkan: database/seeders/data/
+        // 2. BUAT DUMMY LOG (Agar obat punya "asal-usul")
+        // Kita kaitkan ke user_id 1 (Asumsi Admin sudah ada di UserSeeder)
+        $log = ImportLog::create([
+            'file_name' => 'drug_fsm_seeder.csv',
+            'status'    => 'success',
+            'user_id'   => 1,
+            'created_at' => now()
+        ]);
+
         $csvFile = database_path('data/drug_fsm_seeder.csv');
 
         if (!File::exists($csvFile)) {
@@ -32,14 +37,13 @@ class MedicineSeeder extends Seeder
         $fileHandle = fopen($csvFile, 'r');
         $header = fgetcsv($fileHandle, 1000, ',');
 
-        $this->command->info("Memulai injeksi data mutlak ke tabel medicines...");
+        $this->command->info("Memulai injeksi data...");
         $count = 0;
 
         while (($row = fgetcsv($fileHandle, 1000, ',')) !== false) {
             $data = array_combine($header, $row);
 
-            // 3. INJEKSI DATA BARU
-            // Kunci array disesuaikan dengan hasil export dari Jupyter (Time-Scale Invariant)
+            // 3. INJEKSI DATA BARU DENGAN RELASI
             Medicine::create([
                 'item_code'       => $data['item_code'],
                 'item_name'       => $data['item_name'],
@@ -50,12 +54,13 @@ class MedicineSeeder extends Seeder
                 'recency'         => $data['recency'],
                 'class_id'        => $data['class_id'],
                 'label'           => $data['label'],
-                'period'          => '2023-2025 (Baseline)'
+                'period'          => '2023-2025 (Baseline)',
+                'import_log_id'   => $log->id // <--- INI BAGIAN TERPENTING
             ]);
             $count++;
         }
 
         fclose($fileHandle);
-        $this->command->info("Selesai. {$count} baris data berhasil disinkronisasi ke MySQL.");
+        $this->command->info("Selesai. {$count} data berhasil disinkronisasi.");
     }
 }

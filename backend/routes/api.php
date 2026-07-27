@@ -21,7 +21,7 @@ Route::get('/user', function (Request $request) {
 // RUTE TERBUKA (PUBLIC)
 // ==========================================
 // Rute ini dibiarkan terbuka agar React bisa mengirim email dan kata sandi
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 // ==========================================
 // RUTE TERTUTUP (PRIVATE & SECURED)
@@ -36,9 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/medicines/periods', [MedicineController::class, 'getPeriods']);
     Route::get('/medicines', [MedicineController::class, 'index']);
     Route::post('/medicines/predict', [MedicineController::class, 'predict']);
-    Route::post('/medicines/batch', [MedicineController::class, 'batchPredict']);
     Route::put('/medicines/category', [MedicineController::class, 'updateDrugCategory']);
-    Route::delete('/medicines/rollback', [MedicineController::class, 'rollbackByPeriod']);
     Route::get('/medicines/master', [MedicineController::class, 'getMasterMedicines']);
 
     // Rute ekstraksi metrik evaluasi ilmiah XGBoost untuk visualisasi antarmuka
@@ -60,19 +58,21 @@ Route::middleware('auth:sanctum')->group(function () {
     // RUTE KHUSUS SUPER ADMIN (DILINDUNGI MIDDLEWARE ISADMIN)
     // ===================================================================
     Route::middleware([\App\Http\Middleware\IsAdmin::class])->group(function () {
+        Route::post('/medicines/import', [MedicineController::class, 'import']);
+        Route::post('/medicines/batch', [MedicineController::class, 'batchPredict']);
+        Route::delete('/medicines/rollback', [MedicineController::class, 'rollbackByPeriod']);
+
         Route::get('/users', [UserController::class, 'index']);          // Menampilkan semua karyawan
         Route::post('/users', [UserController::class, 'store']);         // Mendaftarkan karyawan baru
         Route::put('/users/{id}', [UserController::class, 'update']);    // Memperbarui data karyawan
         Route::delete('/users/{id}', [UserController::class, 'destroy']); // Menghapus akun karyawan
-    });
 
-    //==================================================================
-    // RUTE TAMBAHAN UNTUK MENGAMBIL RIWAYAT IMPORT
-    //==================================================================
-    Route::get('/import-history', function () {
-        return response()->json([
-            'success' => true,
-            'data' => \App\Models\ImportLog::orderBy('created_at', 'desc')->get()
-        ]);
+        // Rute untuk mengambil riwayat import
+        Route::get('/import-history', function () {
+            return response()->json([
+                'success' => true,
+                'data' => \App\Models\ImportLog::orderBy('created_at', 'desc')->get()
+            ]);
+        });
     });
 });
