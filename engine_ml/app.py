@@ -88,9 +88,13 @@ def predict_batch():
         else:
             xls = pd.ExcelFile(file)
             target_sheet = 'MASTER' if 'MASTER' in xls.sheet_names else 0
+
+            # Coba baca dengan header standar baris ke-8 (index 7) atau ke-9 (index 8)
             df = pd.read_excel(xls, sheet_name=target_sheet, header=8)
             if 'Trx Date' not in df.columns:
                 df = pd.read_excel(xls, sheet_name=target_sheet, header=9)
+            if 'Trx Date' not in df.columns:
+                df = pd.read_excel(xls, sheet_name=target_sheet, header=7) # Tambahan fallback pengaman
 
         if 'Trx Date' not in df.columns:
              return jsonify({
@@ -165,4 +169,4 @@ def predict_batch():
         return jsonify({'success': False, 'message': f'Error ETL Python: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', debug=True, port=5000)
+    app.run(host='0.0.0.0', debug=False, port=5000)

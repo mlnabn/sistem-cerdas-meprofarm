@@ -13,7 +13,7 @@ class MedicineController extends Controller
 {
     public function import(Request $request)
     {
-        $request->validate(['file' => 'required|file|mimes:csv,txt']);
+        $request->validate(['file' => 'required|file|mimes:csv,txt,xls,xlsx|max:51200']);
 
         $log = $this->createImportLog(
             'CSV IMPORT - ' . $request->file('file')->getClientOriginalName(),
@@ -153,7 +153,7 @@ class MedicineController extends Controller
         );
 
         try {
-            $response = Http::timeout(30)->post('http://127.0.0.1:5000/api/predict', $request->all());
+            $response = Http::timeout(90)->post('http://ai_engine:5000/api/predict', $request->all());
 
             if ($response->successful()) {
                 $result = $response->json();
