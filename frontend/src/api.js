@@ -1,9 +1,14 @@
 import axios from 'axios';
 
+// Membaca variabel dari .env, atau jatuh pada rute lokal jika gagal
+const apiUrl = import.meta.env.VITE_API_URL 
+    ? `${import.meta.env.VITE_API_URL}/api` 
+    : 'http://127.0.0.1:8000/api';
+
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api',
+    baseURL: apiUrl,
     headers: {
-        'Accept': 'application/json' // Wajib agar Laravel tidak merespons dengan HTML
+        'Accept': 'application/json' 
     }
 });
 
