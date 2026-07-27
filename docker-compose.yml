@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  mysql_db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: meprosmart_db
+      MYSQL_ROOT_PASSWORD: secure_root_password_change_me
+      MYSQL_USER: mepro_user
+      MYSQL_PASSWORD: mepro_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Port tidak diekspos keluar untuk mencegah eksploitasi basis data
+
+  ai_engine:
+    build:
+      context: ./engine_ml
+      dockerfile: Dockerfile
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G  # Krusial: Mencegah komputasi XGBoost mengambil seluruh RAM VPS
+
+  backend_app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - mysql_db
+      - ai_engine
+    environment:
+      # Resolusi DNS Internal Docker, tidak perlu IP Publik
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql_db
+      - DB_PORT=3306
+      - DB_DATABASE=meprosmart_db
+      - DB_USERNAME=mepro_user
+      - DB_PASSWORD=mepro_password
+      - AI_API_URL=http://ai_engine:5000 # Sesuaikan dengan variabel env di kode Laravel Anda
+
+  frontend_web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - backend_app
+    ports:
+      - "80:80"  # Satu-satunya port yang dibuka untuk internet
+
+volumes:
+  mysql_data:
