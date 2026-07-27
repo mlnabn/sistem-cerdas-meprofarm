@@ -77,11 +77,13 @@ class MedicineController extends Controller
         $log = $this->createImportLog('BATCH PREDICT - ' . $fileName, 'processing', $request->user()->id);
 
         try {
+            $aiUrl = env('AI_API_URL', 'http://ai_engine:5000');
+
             $response = Http::timeout(90)->attach(
                 'file',
                 file_get_contents($file),
                 $fileName
-            )->post('http://127.0.0.1:5000/api/predict/batch');
+            )->post("{$aiUrl}/api/predict/batch");
 
             if ($response->successful()) {
                 $result = $response->json();
@@ -153,7 +155,9 @@ class MedicineController extends Controller
         );
 
         try {
-            $response = Http::timeout(90)->post('http://ai_engine:5000/api/predict', $request->all());
+            $aiUrl = env('AI_API_URL', 'http://ai_engine:5000');
+
+            $response = Http::timeout(90)->post("{$aiUrl}/api/predict", $request->all());
 
             if ($response->successful()) {
                 $result = $response->json();
