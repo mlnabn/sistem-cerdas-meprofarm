@@ -5,6 +5,9 @@ RUN apt-get update && apt-get install -y \
     libzip-dev zip unzip git libonig-dev \
     && docker-php-ext-install pdo_mysql zip
 
+# Menyuntikkan konfigurasi PHP kustom (Upload limit & Memory)
+COPY custom-php.ini /usr/local/etc/php/conf.d/
+
 # Konfigurasi Apache untuk Laravel
 RUN a2enmod rewrite
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
