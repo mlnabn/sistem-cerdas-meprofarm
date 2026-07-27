@@ -31,6 +31,8 @@ services:
     depends_on:
       - mysql_db
       - ai_engine
+    ports:
+      - "8000:80"  # Akses API eksternal
     environment:
       # Resolusi DNS Internal Docker, tidak perlu IP Publik
       - DB_CONNECTION=mysql
@@ -39,7 +41,7 @@ services:
       - DB_DATABASE=meprosmart_db
       - DB_USERNAME=mepro_user
       - DB_PASSWORD=mepro_password
-      - AI_API_URL=http://ai_engine:5000 # Sesuaikan dengan variabel env di kode Laravel Anda
+      - AI_API_URL=http://ai_engine:5000
 
   frontend_web:
     build:
