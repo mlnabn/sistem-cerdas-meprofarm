@@ -10,7 +10,6 @@ frontend/.env
 # Mengabaikan fail data riil dan log
 *.xls
 *.xlsx
-*.csv
 *.log
 
 # Mengabaikan model biner (kecuali Anda ingin menyimpannya, tapi rawan batas ukuran Git)
