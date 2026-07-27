@@ -1,5 +1,5 @@
-# Stage 1: Build (Kompilasi)
-FROM node:18-alpine AS builder
+# Stage 1: Build (Kompilasi) menggunakan Node 22
+FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
